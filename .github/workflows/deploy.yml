@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Scan Repository for Hardcoded Secrets
-        uses: trufflesecurity/trufflehog-action@main
+        uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --only-verified
 

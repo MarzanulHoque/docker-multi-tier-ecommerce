@@ -178,25 +178,30 @@ fi
 
 ---
 
-### 6. Git Pre-Commit Security Hook Secret Interception
+### 6. Git Pre-Commit Security & TruffleHog GitHub Action Interception
 
 #### 🔍 Symptom & Error Log
 ```text
+Error: Unable to resolve action trufflesecurity/trufflehog-action, repository not found
+```
+Or local hook intercept:
+```text
 🛡️ Running pre-commit security inspection...
 ❌ COMMIT BLOCKED: Hardcoded password assignment detected in staged changes
-Please remove hardcoded secrets and use environment variables instead.
 ```
 
 #### 🧠 Root Cause Analysis
-The local Git `pre-commit` hook ([`.git/hooks/pre-commit`](file:///d:/Docker%20E%20commerce/.git/hooks/pre-commit)) scans staged `git diff` chunks for regex patterns matching hardcoded password assignments. When a fallback password string was added to a shell script, the hook intercepted the commit and aborted execution.
+1. **GitHub Action Resolution Failure**: The action repository reference in [`.github/workflows/deploy.yml`](file:///d:/Docker%20E%20commerce/Project%20Files/.github/workflows/deploy.yml) was configured as `trufflesecurity/trufflehog-action@main` (which does not exist or was renamed on GitHub Marketplace). The official action repository is `trufflesecurity/trufflehog@main`.
+2. **Local Pre-commit Hook**: The local Git `pre-commit` hook scans staged diffs for regex secret patterns and halts commits when hardcoded secrets are present.
 
 #### 🛠️ Resolution & Commands
-Removed hardcoded secret fallbacks from all shell scripts and enforced dynamic parameter extraction from AWS SSM Parameter Store (`/prod/ecommerce/db_password`) into shell RAM memory (`export POSTGRES_PASSWORD`).
+- Updated `.github/workflows/deploy.yml` line 27 from `trufflesecurity/trufflehog-action@main` to `trufflesecurity/trufflehog@main`.
+- Enforced secret parameter extraction dynamically via AWS SSM Parameter Store (`/prod/ecommerce/db_password`).
 
 #### 🧪 Verification Command
 ```bash
-git commit -m "test commit"
-# Expected Output: ✅ Security inspection passed! No secret leaks detected.
+git commit -m "fix CI workflow"
+# Expected Output: GitHub Actions CI workflow resolves action successfully and executes security audit gate.
 ```
 
 ---
