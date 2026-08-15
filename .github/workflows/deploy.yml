@@ -89,7 +89,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy Pre-built Images to EC2 via SSH
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -99,37 +99,19 @@ jobs:
             set -e
             echo "🚀 Starting Production Deployment..."
 
-            # 1. Pull latest repository setup files
             if [ -d "docker-multi-tier-ecommerce" ]; then
               cd docker-multi-tier-ecommerce
             elif [ -d "Docker-E-commerce" ]; then
               cd Docker-E-commerce
+            elif [ -d "app" ]; then
+              cd app
             else
-              git clone https://github.com/MarzanulHoque/docker-multi-tier-ecommerce.git
-              cd docker-multi-tier-ecommerce
+              git clone https://github.com/MarzanulHoque/docker-multi-tier-ecommerce.git app
+              cd app
             fi
             git pull origin main
 
-            # 2. Fetch database password from AWS SSM Parameter Store into RAM
-            TOKEN=$(curl -s -S -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null || true)
-            if [ -n "$TOKEN" ]; then
-              DETECTED_REGION=$(curl -s -H "X-aws-ec2-metadata-token-ttl-seconds: 60" -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region 2>/dev/null || true)
-            fi
-            AWS_REGION="${DETECTED_REGION:-us-east-1}"
-
-            export POSTGRES_PASSWORD=$(aws ssm get-parameter \
-              --name "/prod/ecommerce/db_password" \
-              --with-decryption \
-              --query "Parameter.Value" \
-              --output text \
-              --region "$AWS_REGION")
-
-            # 3. Log in to GHCR and pull pre-built images (No building on EC2!)
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull
-            docker compose up -d --remove-orphans
-
-            # 4. Clean up dangling unused images
-            docker image prune -f
+            chmod +x deploy-ec2.sh
+            ./deploy-ec2.sh
 
             echo "✅ Production Deployment Complete!"
