@@ -4,6 +4,12 @@ This document provides a deep technical breakdown of every architectural, networ
 
 ---
 
+## 👥 Repository Owner & Contributor
+
+- **Repository Owner & Lead Contributor**: [S. M. MARZANUL HOQUE](https://github.com/MarzanulHoque) (`marzanul.haque@bizzntek.com`)
+
+---
+
 ## 🛠️ Deep Dive Troubleshooting Matrix
 
 ### 1. SSH Private Key Permission Rejection (`bad permissions 0555`)
