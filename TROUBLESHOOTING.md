@@ -206,6 +206,30 @@ git commit -m "fix CI workflow"
 
 ---
 
+### 7. Git Pull Merge Conflict on EC2 (`Your local changes would be overwritten by merge`)
+
+#### 🔍 Symptom & Error Log
+```text
+err: error: Your local changes to the following files would be overwritten by merge:
+err: 	deploy-ec2.sh
+err: Please commit your changes or stash them before you merge.
+err: Aborting
+```
+
+#### 🧠 Root Cause Analysis
+During manual testing or execution of scripts directly on the EC2 server (e.g. `chmod +x deploy-ec2.sh` or inline modifications), the working directory on the server was left with modified untracked or tracked file states. When `git pull origin main` ran during automated deployment, Git aborted the merge to protect uncommitted server changes.
+
+#### 🛠️ Resolution & Commands
+Added `git checkout -- .` prior to `git pull origin main` in [`.github/workflows/deploy.yml`](file:///d:/Docker%20E%20commerce/Project%20Files/.github/workflows/deploy.yml) to discard local workspace modifications on the server before pulling fresh commits.
+
+#### 🧪 Verification Command
+```bash
+git pull origin main
+# Expected Output: Successfully updated without merge abort.
+```
+
+---
+
 ## 📋 Comprehensive Pre-Flight Verification Checklist
 
 Before deploying updates to production, verify the following checklist:
