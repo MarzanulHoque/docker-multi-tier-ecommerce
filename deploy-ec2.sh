@@ -13,7 +13,7 @@ if ! command -v docker &> /dev/null; then
     echo "📦 Initializing host dependencies & installing Docker Engine..."
     if command -v apt-get &> /dev/null; then
         sudo apt-get update -y
-        sudo apt-get install -y ca-certificates curl gnupg git awscli
+        sudo apt-get install -y ca-certificates curl gnupg git || true
     fi
 
     curl -fsSL https://get.docker.com -o get-docker.sh
@@ -36,6 +36,7 @@ fi
 AWS_REGION="${AWS_REGION:-${DETECTED_REGION:-us-east-1}}"
 
 # 3. Fetch Database Password from AWS SSM Parameter Store into Memory
+echo "🌍 Detected AWS Region: $AWS_REGION"
 echo "🔐 Fetching database password from AWS SSM Parameter Store..."
 if command -v aws &> /dev/null; then
     POSTGRES_PASSWORD=$(aws ssm get-parameter \
