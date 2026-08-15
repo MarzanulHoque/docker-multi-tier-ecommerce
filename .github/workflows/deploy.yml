@@ -54,7 +54,7 @@ jobs:
             
             git pull origin main
 
-            chmod +x deploy-ec2-ssm.sh
-            ./deploy-ec2-ssm.sh
+            chmod +x deploy-ec2.sh
+            ./deploy-ec2.sh
 
             echo "✅ Deployment complete!"
