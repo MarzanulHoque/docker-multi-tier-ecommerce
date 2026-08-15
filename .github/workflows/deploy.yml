@@ -33,7 +33,8 @@ jobs:
               cd app
             fi
 
-            # 2. Pull latest code from GitHub main branch
+            # 2. Reset local changes on server & pull latest code from GitHub main branch
+            git checkout -- .
             git pull origin main
 
             # 3. Build & start containers directly on EC2
