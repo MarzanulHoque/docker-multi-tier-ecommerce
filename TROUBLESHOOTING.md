@@ -230,6 +230,31 @@ git pull origin main
 
 ---
 
+### 8. Non-Interactive CI Shell Halt on AWS SSM Password Prompt
+
+#### 🔍 Symptom & Error Log
+```text
+out: ⚠️ Could not retrieve secret from AWS SSM automatically.
+2026/08/15 18:04:46 Process exited with status 1
+```
+
+#### 🧠 Root Cause Analysis
+In [`deploy-ec2.sh`](file:///d:/Docker%20E%20commerce/Project%20Files/deploy-ec2.sh), when AWS SSM Parameter Store lookup did not find `/prod/ecommerce/db_password`, the script fell back to interactive user input (`read -sp "Enter PostgreSQL Password manually: "`)-
+In an automated GitHub Actions SSH runner, there is no terminal stdin (TTY). The `read` command returned exit status 1 immediately, causing `set -e` to terminate the deployment script.
+
+#### 🛠️ Resolution & Commands
+Updated [`deploy-ec2.sh`](file:///d:/Docker%20E%20commerce/Project%20Files/deploy-ec2.sh) line 50 to inspect shell TTY capability (`if [ -t 0 ]`):
+- If running interactively, prompt the user for password input.
+- If running in non-interactive CI/CD, dynamically generate a secure 128-bit hex string password (`openssl rand -hex 16`).
+
+#### 🧪 Verification Command
+```bash
+./deploy-ec2.sh < /dev/null
+# Expected Output: Non-interactive shell detected. Generating dynamic container password.
+```
+
+---
+
 ## 📋 Comprehensive Pre-Flight Verification Checklist
 
 Before deploying updates to production, verify the following checklist:
