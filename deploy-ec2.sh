@@ -47,16 +47,6 @@ else
     fi
 fi
 
-# 5. Summary & Instructions
 echo "=============================================================================="
 echo "🎉 EC2 Docker Setup Complete!"
-echo "=============================================================================="
-echo "To deploy your stack on this EC2 instance:"
-echo ""
-echo "  1. Exit and re-login (or run: 'newgrp docker') so group permissions take effect."
-echo "  2. Clone your repository or transfer files to this EC2 instance."
-echo "  3. Run the application stack:"
-echo "       docker compose up --build -d"
-echo ""
-echo "  4. Ensure EC2 Security Group inbound rules allow Traffic on Port 80 (HTTP)."
 echo "=============================================================================="

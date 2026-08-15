@@ -7,23 +7,42 @@ networks:
 volumes:
   pg_data:
     driver: local
+  certbot_etc:
+    driver: local
+  certbot_var:
+    driver: local
 
 services:
-  # 1. Reverse Proxy / SSL Termination
+  # 1. Reverse Proxy / SSL Termination (Ports 80 & 443)
   proxy:
     image: nginx:alpine
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/www/certbot
     depends_on:
       - frontend
       - backend
     networks:
       - app-network
 
-  # 2. Frontend SPA
+  # 2. Certbot (Automated SSL Certificate Manager)
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - app-network
+
+  # 3. Frontend SPA
   frontend:
     build:
       context: ./frontend
@@ -32,7 +51,7 @@ services:
     networks:
       - app-network
 
-  # 3. Backend API Service
+  # 4. Backend API Service
   backend:
     build:
       context: ./backend
@@ -49,7 +68,7 @@ services:
     networks:
       - app-network
 
-  # 4. PostgreSQL Database
+  # 5. PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
