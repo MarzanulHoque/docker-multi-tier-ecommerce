@@ -1,14 +1,33 @@
-name: CI/CD Production Deployment to AWS EC2
+name: CI/CD Production Deployment & Security Gate
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  security-audit:
+    name: Security Scan & Secret Leak Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan Repository for Hardcoded Secrets
+        uses: trufflesecurity/trufflehog-action@main
+        with:
+          extra_args: --only-verified
+
   deploy:
     name: Deploy Application to EC2
+    needs: security-audit
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout Code
@@ -24,7 +43,6 @@ jobs:
             set -e
             echo "🚀 Connecting to EC2 and pulling latest code..."
             
-            # Navigate to workspace directory
             if [ -d "docker-multi-tier-ecommerce" ]; then
               cd docker-multi-tier-ecommerce
             elif [ -d "Docker-E-commerce" ]; then
@@ -34,10 +52,8 @@ jobs:
               cd docker-multi-tier-ecommerce
             fi
             
-            # Pull latest changes from main branch
             git pull origin main
 
-            # Make deployment script executable and run AWS SSM secret fetch + Docker Compose deploy
             chmod +x deploy-ec2-ssm.sh
             ./deploy-ec2-ssm.sh
 
