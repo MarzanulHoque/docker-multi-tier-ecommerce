@@ -49,8 +49,13 @@ fi
 
 if [ -z "$POSTGRES_PASSWORD" ]; then
     echo "⚠️ Could not retrieve secret from AWS SSM automatically."
-    read -sp "Enter PostgreSQL Password manually: " POSTGRES_PASSWORD
-    echo ""
+    if [ -t 0 ]; then
+        read -sp "Enter PostgreSQL Password manually: " POSTGRES_PASSWORD
+        echo ""
+    else
+        echo "⚡ Non-interactive shell detected. Generating dynamic container password."
+        POSTGRES_PASSWORD=$(openssl rand -hex 16)
+    fi
 fi
 
 # 4. Fast Rebuild & Redeploy using Docker Cache
