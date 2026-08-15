@@ -1,0 +1,21 @@
+# Production `.gitignore` for Docker Multi-Tier Application
+
+# Secrets & Environment variables
+secrets/
+.env
+*.env.local
+
+# Node.js dependencies & build outputs
+node_modules/
+dist/
+build/
+npm-debug.log*
+
+# Docker local data volumes
+pg_data/
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

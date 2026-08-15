@@ -1,0 +1,44 @@
+name: CI/CD Production Deployment to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Application to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Connecting to EC2 and pulling latest code..."
+            
+            # Navigate to workspace directory
+            if [ -d "docker-multi-tier-ecommerce" ]; then
+              cd docker-multi-tier-ecommerce
+            elif [ -d "Docker-E-commerce" ]; then
+              cd Docker-E-commerce
+            else
+              git clone https://github.com/MarzanulHoque/docker-multi-tier-ecommerce.git
+              cd docker-multi-tier-ecommerce
+            fi
+            
+            # Pull latest changes from main branch
+            git pull origin main
+
+            # Make deployment script executable and run AWS SSM secret fetch + Docker Compose deploy
+            chmod +x deploy-ec2-ssm.sh
+            ./deploy-ec2-ssm.sh
+
+            echo "✅ Deployment complete!"

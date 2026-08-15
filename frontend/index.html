@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise E-Commerce Platform</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #4ade80;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 2rem; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+    .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); }
+
+    .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); }
+    .card h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #e2e8f0; }
+
+    .status-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .status-item:last-child { border-bottom: none; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; background: #ef4444; }
+    .dot.online { background: var(--success); }
+
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .product-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: left; }
+    .product-card h3 { font-size: 1rem; margin-bottom: 0.5rem; color: #fff; }
+    .product-card .price { font-size: 1.25rem; font-weight: bold; color: var(--accent); margin-bottom: 0.5rem; }
+    .product-card .cat { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .source-tag { display: inline-block; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: #334155; margin-bottom: 1rem; }
+    .btn { background: var(--accent); color: #0f172a; border: none; padding: 0.5rem 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛒 Enterprise E-Commerce Demo</h1>
+      <span class="badge">Docker Multi-Tier Stack</span>
+    </header>
+
+    <div class="grid">
+      <!-- System Health Card -->
+      <div class="card">
+        <h2>Infrastructure Health</h2>
+        <div class="status-item">
+          <span>Nginx Reverse Proxy</span>
+          <span><span class="dot online"></span>Active</span>
+        </div>
+        <div class="status-item">
+          <span>Backend API</span>
+          <span id="backend-status"><span class="dot"></span>Checking...</span>
+        </div>
+        <div class="status-item">
+          <span>PostgreSQL DB</span>
+          <span id="db-status"><span class="dot"></span>Checking...</span>
+        </div>
+        <div class="status-item">
+          <span>Redis Cache</span>
+          <span id="redis-status"><span class="dot"></span>Checking...</span>
+        </div>
+        <button class="btn" style="margin-top: 1.5rem; width: 100%;" onclick="refreshData()">Refresh Dashboard</button>
+      </div>
+
+      <!-- Live Data Card -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>Product Catalog</h2>
+          <span id="data-source" class="source-tag">Source: Fetching...</span>
+        </div>
+        <div id="product-list" class="product-grid">
+          <p style="color: var(--text-muted);">Loading products from backend API...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        
+        document.getElementById('backend-status').innerHTML = '<span class="dot online"></span>' + data.status;
+        document.getElementById('db-status').innerHTML = '<span class="dot ' + (data.services.database === 'healthy' ? 'online' : '') + '"></span>' + data.services.database;
+        document.getElementById('redis-status').innerHTML = '<span class="dot ' + (data.services.redis === 'healthy' ? 'online' : '') + '"></span>' + data.services.redis;
+      } catch (err) {
+        document.getElementById('backend-status').innerHTML = '<span class="dot"></span>Offline';
+        document.getElementById('db-status').innerHTML = '<span class="dot"></span>Offline';
+        document.getElementById('redis-status').innerHTML = '<span class="dot"></span>Offline';
+      }
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        const result = await res.json();
+        
+        document.getElementById('data-source').innerText = 'Data Source: ' + (result.source ? result.source.toUpperCase() : 'N/A');
+        
+        const container = document.getElementById('product-list');
+        if (result.data && result.data.length > 0) {
+          container.innerHTML = result.data.map(p => `
+            <div class="product-card">
+              <div class="cat">${p.category}</div>
+              <h3>${p.name}</h3>
+              <div class="price">$${parseFloat(p.price).toFixed(2)}</div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p style="color: var(--text-muted);">No products found.</p>';
+        }
+      } catch (err) {
+        document.getElementById('product-list').innerHTML = '<p style="color: #ef4444;">Failed to load products from /api/products.</p>';
+      }
+    }
+
+    function refreshData() {
+      checkHealth();
+      loadProducts();
+    }
+
+    refreshData();
+    setInterval(refreshData, 10000);
+  </script>
+</body>
+</html>
