@@ -68,10 +68,6 @@
           <span>PostgreSQL DB</span>
           <span id="db-status"><span class="dot"></span>Checking...</span>
         </div>
-        <div class="status-item">
-          <span>Redis Cache</span>
-          <span id="redis-status"><span class="dot"></span>Checking...</span>
-        </div>
         <button class="btn" style="margin-top: 1.5rem; width: 100%;" onclick="refreshData()">Refresh Dashboard</button>
       </div>
 
@@ -96,11 +92,9 @@
         
         document.getElementById('backend-status').innerHTML = '<span class="dot online"></span>' + data.status;
         document.getElementById('db-status').innerHTML = '<span class="dot ' + (data.services.database === 'healthy' ? 'online' : '') + '"></span>' + data.services.database;
-        document.getElementById('redis-status').innerHTML = '<span class="dot ' + (data.services.redis === 'healthy' ? 'online' : '') + '"></span>' + data.services.redis;
       } catch (err) {
         document.getElementById('backend-status').innerHTML = '<span class="dot"></span>Offline';
         document.getElementById('db-status').innerHTML = '<span class="dot"></span>Offline';
-        document.getElementById('redis-status').innerHTML = '<span class="dot"></span>Offline';
       }
     }
 

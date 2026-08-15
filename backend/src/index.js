@@ -1,6 +1,5 @@
 const express = require('express');
 const { Pool } = require('pg');
-const { createClient } = require('redis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,32 +15,16 @@ const dbHost = process.env.POSTGRES_HOST || 'postgres';
 const dbUrl = process.env.DATABASE_URL || `postgres://${dbUser}:${encodeURIComponent(dbPassword)}@${dbHost}:5432/${dbName}`;
 const pool = new Pool({ connectionString: dbUrl });
 
-const redisHost = process.env.REDIS_HOST || 'redis';
-const redisClient = createClient({ url: `redis://${redisHost}:6379` });
-
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
-
-(async () => {
-  try {
-    await redisClient.connect();
-    console.log('Connected to Redis');
-  } catch (err) {
-    console.error('Failed to connect to Redis on boot', err);
-  }
-})();
-
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
     const dbRes = await pool.query('SELECT 1');
-    const redisPing = redisClient.isReady ? await redisClient.ping() : 'NOT_CONNECTED';
 
     res.json({
       status: 'UP',
       timestamp: new Date().toISOString(),
       services: {
-        database: dbRes.rowCount === 1 ? 'healthy' : 'unhealthy',
-        redis: redisPing === 'PONG' ? 'healthy' : 'unhealthy'
+        database: dbRes.rowCount === 1 ? 'healthy' : 'unhealthy'
       }
     });
   } catch (error) {
@@ -49,25 +32,10 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Products API endpoint with Redis caching & DB fallback
+// Products API endpoint with direct PostgreSQL query
 app.get('/api/products', async (req, res) => {
   try {
-    // 1. Check Redis Cache
-    if (redisClient.isReady) {
-      const cached = await redisClient.get('products_list');
-      if (cached) {
-        return res.json({ source: 'cache', data: JSON.parse(cached) });
-      }
-    }
-
-    // 2. Fetch from PostgreSQL
     const { rows } = await pool.query('SELECT * FROM products ORDER BY id ASC');
-
-    // 3. Populate Redis Cache (expire in 60s)
-    if (redisClient.isReady && rows.length > 0) {
-      await redisClient.setEx('products_list', 60, JSON.stringify(rows));
-    }
-
     res.json({ source: 'database', data: rows });
   } catch (error) {
     console.error('Error fetching products:', error);
