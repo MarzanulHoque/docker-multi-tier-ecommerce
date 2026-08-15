@@ -23,8 +23,9 @@ services:
     networks:
       - app-network
 
-  # 2. Frontend SPA
+  # 2. Frontend SPA (Pre-built OCI Image from GHCR)
   frontend:
+    image: ghcr.io/marzanulhoque/docker-multi-tier-ecommerce/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -32,8 +33,9 @@ services:
     networks:
       - app-network
 
-  # 3. Backend API Service
+  # 3. Backend API Service (Pre-built Multi-Stage Image from GHCR)
   backend:
+    image: ghcr.io/marzanulhoque/docker-multi-tier-ecommerce/backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
