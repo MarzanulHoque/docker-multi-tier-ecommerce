@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # AWS EC2 Automated Setup Script for Docker Multi-Tier Application
-# Tested on: Ubuntu 22.04 LTS / Ubuntu 24.04 LTS / Amazon Linux 2023
+# Tested on: Ubuntu 24.04 LTS 
 # ==============================================================================
 
 set -e
