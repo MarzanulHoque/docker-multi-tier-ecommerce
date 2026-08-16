@@ -6,7 +6,7 @@ This document provides a deep technical breakdown of every architectural, networ
 
 ## 👥 Repository Owner & Contributor
 
-- **Repository Owner & Lead Contributor**: [S. M. MARZANUL HOQUE](https://github.com/MarzanulHoque) (`marzanul.haque@bizzntek.com`)
+- **Repository Owner & Lead Contributor**: [S. M. MARZANUL HOQUE](https://github.com/MarzanulHoque) (`marzanulru17@gmail.com`)
 
 ---
 

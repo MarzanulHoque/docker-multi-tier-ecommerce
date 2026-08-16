@@ -8,7 +8,7 @@ A production-grade, highly available, multi-tier e-commerce web application plat
 
 | Role | Name | GitHub | Contact |
 | :--- | :--- | :--- | :--- |
-| **Repository Owner & Lead Architect** | **S. M. MARZANUL HOQUE** | [@MarzanulHoque](https://github.com/MarzanulHoque) | `marzanul.haque@bizzntek.com` |
+| **Repository Owner & Lead Architect** | **S. M. MARZANUL HOQUE** | [@MarzanulHoque](https://github.com/MarzanulHoque) | `marzanulru17@gmail.com` |
 
 ---
 
