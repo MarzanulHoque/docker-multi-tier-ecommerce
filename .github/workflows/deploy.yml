@@ -21,16 +21,10 @@ jobs:
             set -e
             echo "🚀 Starting Direct AWS EC2 Deployment & Build..."
 
-            # 1. Navigate to or clone project directory
-            if [ -d "docker-multi-tier-ecommerce" ]; then
-              cd docker-multi-tier-ecommerce
-            elif [ -d "Docker-E-commerce" ]; then
-              cd Docker-E-commerce
-            elif [ -d "app" ]; then
-              cd app
-            else
-              git clone https://github.com/MarzanulHoque/docker-multi-tier-ecommerce.git app
-              cd app
+            # 1. Navigate to project directory or clone if missing
+            mkdir -p app && cd app
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/MarzanulHoque/docker-multi-tier-ecommerce.git .
             fi
 
             # 2. Reset local changes on server & pull latest code from GitHub main branch
