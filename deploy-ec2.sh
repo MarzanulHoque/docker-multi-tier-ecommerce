@@ -64,6 +64,10 @@ export POSTGRES_PASSWORD
 echo "🏗️ Building & updating containers..."
 sudo -E docker compose up --build -d
 
+echo "⏳ Waiting for containers to complete health initialization..."
+# Reload proxy after services are ready to ensure fresh container DNS resolution
+sudo docker compose restart proxy
+
 echo "=============================================================================="
 echo "⚡ Deployment complete! Containers running:"
 sudo docker compose ps
